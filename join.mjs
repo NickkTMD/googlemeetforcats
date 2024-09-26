@@ -2,7 +2,7 @@ import path from "path";
 
 import { chromium } from "playwright";
 import "dotenv/config";
-import { wait } from "./helpers.mjs";
+import { MEETING_ID_REGEX, wait } from "./helpers.mjs";
 
 const browser = await chromium.launch({
     headless: true,
@@ -15,14 +15,13 @@ const browser = await chromium.launch({
 });
 
 const meetingId = process.argv[2];
-if (!meetingId || !/^[a-z]{2,5}-[a-z]{2,5}-[a-z]{2,5}$/.test(meetingId)) {
+if (!meetingId || !MEETING_ID_REGEX.test(meetingId)) {
     console.error("Invalid Meeting ID!");
     process.exit(1);
 }
 
 const context = await browser.newContext({
     permissions: ["microphone", "camera"],
-    deviceScaleFactor: 20,
 });
 
 const page = await context.newPage();
@@ -68,7 +67,6 @@ try {
     console.error("Noise cancellation button not found");
 }
 
-// find button w/ label Close dialog
 await page.click('button[aria-label="Close dialog"]');
 
 console.log("Joining meeting");
