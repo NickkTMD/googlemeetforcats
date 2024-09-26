@@ -30,8 +30,6 @@ async function joinGoogleMeet(meetingUrl, email, password) {
 
   const context = await browser.newContext({
     permissions: ["microphone", "camera"],
-    // max volume microphone
-    deviceScaleFactor: 20,
   });
 
   const page = await context.newPage();
