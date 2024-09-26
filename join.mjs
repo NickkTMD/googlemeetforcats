@@ -4,8 +4,6 @@ import { chromium } from "playwright";
 import "dotenv/config";
 import { wait } from "./helpers.mjs";
 
-console.log(path.join(import.meta.dirname, "cat_videos", "short", "video.y4m"))
-
 const browser = await chromium.launch({
     headless: true,
     args: [
@@ -30,6 +28,7 @@ const context = await browser.newContext({
 const page = await context.newPage();
 
 // Navigate to Google login
+console.log("Signing in")
 await page.goto("https://accounts.google.com/signin");
 
 // Fill in email
@@ -45,10 +44,11 @@ await page.click("#passwordNext");
 await page.waitForNavigation();
 
 // Navigate to the Google Meet URL
+console.log("Navigating to Google Meet");
 await page.goto("https://meet.google.com/" + meetingId);
 
-console.log("Joining the meeting");
 
+console.log("Configuring settings");
 // More Options
 await page.waitForSelector('button[aria-label="More options"]');
 await page.click('button[aria-label="More options"]');
@@ -63,9 +63,7 @@ try {
     await page.waitForSelector('button[aria-label="Noise cancellation"]', {
         timeout: 1000,
     });
-    console.log("Found noise cancellation button");
     await page.click('button[aria-label="Noise cancellation"]');
-    console.log("Clicked noise cancellation button");
 } catch (err) {
     console.error("Noise cancellation button not found");
 }
@@ -73,6 +71,7 @@ try {
 // find button w/ label Close dialog
 await page.click('button[aria-label="Close dialog"]');
 
+console.log("Joining meeting");
 const result = await Promise.race([
     page
         .waitForSelector('span:has-text("Join now")', { timeout: 60000 })
@@ -82,14 +81,13 @@ const result = await Promise.race([
         .then(() => ({ type: "ask", element: 'span:has-text("Ask to join")' })),
 ]);
 
-console.log(`Found ${result.type} button`);
 await page.click(result.element);
-console.log(`Clicked ${result.type} button`);
 
 await wait(10000);
+
+console.log("Cleaning up")
 await page.close({ 
     runBeforeUnload: true
 });
-await wait(1000);
 await context.close();
 await browser.close();
