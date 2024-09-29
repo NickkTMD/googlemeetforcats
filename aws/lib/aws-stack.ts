@@ -1,4 +1,4 @@
-import { Stack, StackProps, aws_lambda, aws_apigatewayv2, CfnOutput } from "aws-cdk-lib";
+import { Stack, StackProps, aws_lambda, aws_apigatewayv2, CfnOutput, aws_lambda_nodejs } from "aws-cdk-lib";
 import { WebSocketLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import { Construct } from "constructs";
 
@@ -7,10 +7,14 @@ export class WSBackendStack extends Stack {
     super(scope, id, props);
 
     // WebSocket Lambdas
-    const defaultRouteLambda = new aws_lambda.Function(this, "DefaultRouteLambda", {
+    const defaultRouteLambda = new aws_lambda_nodejs.NodejsFunction(this, "DefaultRouteLambda", {
+      entry: "lambda/default.ts",
+      handler: "handler",
       runtime: aws_lambda.Runtime.NODEJS_20_X,
-      handler: "default.handler",
-      code: aws_lambda.Code.fromAsset("build/lambda")
+      bundling: {
+        nodeModules: ["playwright"],
+        minify: true,
+      }
     });
 
     // Create WebSocket API
