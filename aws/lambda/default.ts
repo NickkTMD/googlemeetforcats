@@ -1,17 +1,10 @@
 import { APIGatewayProxyWebsocketEventV2, Context } from "aws-lambda";
-import { ApiGatewayManagementApiClient, PostToConnectionCommand } from "@aws-sdk/client-apigatewaymanagementapi";
+import { getManagementApi, sendMessage } from "./helpers";
 
 export const handler = async (event: APIGatewayProxyWebsocketEventV2, context: Context) => {
-  const apiGatewayManagementApi = new ApiGatewayManagementApiClient({
-    endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`
-  });
-  
-  const command = new PostToConnectionCommand({
-      ConnectionId: event.requestContext.connectionId,
-      Data: "Hi!"
-  });
-
-  await apiGatewayManagementApi.send(command);
+  const apiGatewayManagementApi = getManagementApi(event);
+  const connectionId = event.requestContext.connectionId;
+  await sendMessage(apiGatewayManagementApi, connectionId, "Hi there!");
 
   return { statusCode: 200 }
 };
